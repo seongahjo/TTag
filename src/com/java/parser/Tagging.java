@@ -1,5 +1,6 @@
 package com.java.parser;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
@@ -11,22 +12,25 @@ public class Tagging {
 		StringTokenizer st=new StringTokenizer(value);
 		String temp;
 		int count;
+		WordReduce reduce=new WordReduce();
 		HashMap<String,Integer> map=new HashMap<String,Integer>();
 		while(st.hasMoreTokens()){
 			temp=st.nextToken();
-			temp=WordReduce.simplify(temp);
-			if(map.get(temp)==null)
-			map.put(temp, 1);
-			else{
-				count=map.get(temp);
-				map.remove(temp);
-				map.put(temp, count+1);
+			temp=reduce.simplify(temp);
+			if(temp!=null) {
+				if (map.get(temp) == null)
+					map.put(temp, 1);
+				else {
+					count = map.get(temp);
+					map.remove(temp);
+					map.put(temp, count + 1);
+				}
 			}
 		}
 		return map;
 	} // end Push
-	
-	private static ArrayList<String> Reduce(HashMap<String,Integer> data,int count){		
+
+	private static ArrayList<String> Reduce(HashMap<String,Integer> data,int count){
 		ArrayList<String> result=new ArrayList<String>();
 		Vector<String> key_list=new Vector<String>();
 		for(String temp:data.keySet())
@@ -47,13 +51,19 @@ public class Tagging {
 		} // endfor
 		return result;
 	} //end Reduce
-	
+	public static ArrayList<String> Tag(File file){
+		String content= ParserUtil.Parse(file);
+		if(content!=null)
+			return Reduce(Push(content),3);
+		else
+			return null;
+	}
 	public static ArrayList<String> Tag(String content, int count){
 		return Reduce(Push(content),count);
 	} //end Tag
-	
+
 	public static ArrayList<String> Tag(String content){
 		return Reduce(Push(content),3);
 	} //end Tag
-	
+
 }
